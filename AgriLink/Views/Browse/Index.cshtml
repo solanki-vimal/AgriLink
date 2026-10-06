@@ -1,0 +1,142 @@
+@model AgriLink.ViewModels.BrowseViewModel
+
+@{
+    ViewData["Title"] = "Marketplace - Browse Fresh Produce";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="fw-bold mb-1">Marketplace</h1>
+        <p class="text-muted mb-0">Browse fresh produce listed directly by verified local farmers</p>
+    </div>
+    <div class="text-muted">
+        Showing <strong>@Model.TotalResultsCount</strong> listing(s)
+    </div>
+</div>
+
+<div class="row">
+    <!-- Filter Sidebar -->
+    <div class="col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white fw-bold py-3">
+                🔍 Filter Produce
+            </div>
+            <div class="card-body">
+                <form method="get" asp-action="Index">
+                    <!-- Search Term -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Search Keywords</label>
+                        <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="e.g. Tomatoes, Organic..." />
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select name="categoryId" class="form-select">
+                            <option value="">All Categories</option>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <option value="@cat.CategoryId" selected="@(Model.CategoryId == cat.CategoryId)">
+                                    @cat.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Location Filter -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Location / Region</label>
+                        <input type="text" name="location" value="@Model.Location" class="form-control" placeholder="e.g. Nashik, Punjab..." />
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Price Range (₹)</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" step="1" name="minPrice" value="@Model.MinPrice" class="form-control" placeholder="Min ₹" />
+                            </div>
+                            <div class="col-6">
+                                <input type="number" step="1" name="maxPrice" value="@Model.MaxPrice" class="form-control" placeholder="Max ₹" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sort Order -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Sort By</label>
+                        <select name="sortBy" class="form-select">
+                            <option value="newest" selected="@(Model.SortBy == "newest")">Newest First</option>
+                            <option value="price_asc" selected="@(Model.SortBy == "price_asc")">Price: Low to High</option>
+                            <option value="price_desc" selected="@(Model.SortBy == "price_desc")">Price: High to Low</option>
+                            <option value="harvest_desc" selected="@(Model.SortBy == "harvest_desc")">Recent Harvest Date</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success fw-bold">Apply Filters</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Reset Filters</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produce Listing Cards -->
+    <div class="col-lg-9">
+        @if (!Model.ProduceListings.Any())
+        {
+            <div class="text-center py-5 bg-white rounded-3 shadow-sm">
+                <div class="fs-1 text-muted mb-3">🔍</div>
+                <h4 class="fw-bold text-muted">No produce matches your criteria</h4>
+                <p class="text-muted">Try adjusting your search terms or expanding your price/location filter.</p>
+                <a asp-action="Index" class="btn btn-outline-success">View All Produce</a>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                @foreach (var item in Model.ProduceListings)
+                {
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm overflow-hidden hover-shadow transition-all">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 180px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="bg-light text-center py-5 text-muted" style="height: 180px;">
+                                    <div class="fs-1">🌱</div>
+                                    <span>No Image Available</span>
+                                </div>
+                            }
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-success bg-opacity-10 text-success fw-semibold px-2 py-1">@item.Category?.Name</span>
+                                    <span class="fs-5 fw-bold text-success">₹@item.Price <small class="fs-6 text-muted fw-normal">/ @item.Unit</small></span>
+                                </div>
+                                <h5 class="card-title fw-bold mb-1">@item.Name</h5>
+                                <p class="text-muted small mb-2">
+                                    📍 @item.Location
+                                </p>
+                                <p class="card-text text-truncate text-secondary small">
+                                    @item.Description
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center small text-muted border-top pt-2 mt-2">
+                                    <span>Harvest: @item.HarvestDate.ToString("MMM dd, yyyy")</span>
+                                    <span>Stock: <strong>@item.Quantity @item.Unit</strong></span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 d-grid pb-3 pt-0">
+                                <a asp-action="Details" asp-route-id="@item.ProduceId" class="btn btn-success fw-semibold">
+                                    View Details &amp; Price History
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
