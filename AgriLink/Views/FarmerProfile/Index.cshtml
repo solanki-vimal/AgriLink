@@ -1,0 +1,44 @@
+﻿@model AgriLink.Models.FarmerProfile
+
+@{
+    ViewData["Title"] = "My Farm Profile";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        @if (!string.IsNullOrEmpty(Model.FarmImageUrl))
+        {
+            <img src="@Model.FarmImageUrl" alt="@Model.FarmName" style="width:100%;max-height:250px;object-fit:cover;" class="rounded mb-3" />
+        }
+
+        <dl class="row">
+            <dt class="col-sm-4">Farm Name</dt>
+            <dd class="col-sm-8">@Model.FarmName</dd>
+
+            <dt class="col-sm-4">Location</dt>
+            <dd class="col-sm-8">@Model.FarmLocation</dd>
+
+            @if (Model.FarmSizeAcres != null)
+            {
+                <dt class="col-sm-4">Farm Size</dt>
+                <dd class="col-sm-8">@Model.FarmSizeAcres acres</dd>
+            }
+
+            @if (Model.YearsOfExperience != null)
+            {
+                <dt class="col-sm-4">Experience</dt>
+                <dd class="col-sm-8">@Model.YearsOfExperience years</dd>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Bio))
+            {
+                <dt class="col-sm-4">About</dt>
+                <dd class="col-sm-8">@Model.Bio</dd>
+            }
+        </dl>
+
+        <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
+    </div>
+</div>

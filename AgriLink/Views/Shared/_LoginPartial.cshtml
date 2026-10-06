@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @using AgriLink.Models
 
 @inject SignInManager<ApplicationUser> SignInManager
@@ -6,17 +6,28 @@
 
 @{
     ApplicationUser currentUser = null;
+    IList<string> userRoles = new List<string>();
     if (SignInManager.IsSignedIn(User))
     {
         currentUser = await UserManager.GetUserAsync(User);
+        if (currentUser != null)
+        {
+            userRoles = await UserManager.GetRolesAsync(currentUser);
+        }
     }
 }
 
-<ul class="navbar-nav">
+<ul class="navbar-nav align-items-center">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <span class="nav-link text-dark">Hello, @currentUser?.FullName!</span>
+    <li class="nav-item me-2">
+        <span class="nav-link text-dark">
+            Hello, <strong>@currentUser?.FullName</strong>
+            @foreach (var role in userRoles)
+            {
+                <span class="badge bg-secondary ms-1">@role</span>
+            }
+        </span>
     </li>
     <li class="nav-item">
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
