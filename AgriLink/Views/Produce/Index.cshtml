@@ -1,70 +1,98 @@
 @model IEnumerable<AgriLink.Models.Produce>
 
 @{
-    ViewData["Title"] = "My Listings";
+    ViewData["Title"] = "My Produce Listings";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">+ New Listing</a>
-</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">My Produce Listings</h2>
+        <p class="text-muted mb-0">Manage your farm harvests listed for buyers on AgriLink</p>
+    </div>
+    <a asp-action="Create" class="btn btn-success fw-bold">+ New Produce Listing</a>
+</div>
 
 @if (!Model.Any())
 {
-    <p class="text-muted">You haven't listed any produce yet.</p>
+    <div class="text-center py-5 bg-white rounded-3 shadow-sm">
+        <div class="fs-1 text-muted mb-3">🚜</div>
+        <h4 class="fw-bold text-muted">You haven't listed any produce yet</h4>
+        <p class="text-muted">Start selling your harvest directly to buyers across the region.</p>
+        <a asp-action="Create" class="btn btn-success fw-semibold">+ Add Your First Produce</a>
+    </div>
 }
 else
 {
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Harvest Date</th>
-                <th>Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td style="width:70px;">
-                        @if (!string.IsNullOrEmpty(item.ImageUrl))
-                        {
-                            <img src="@item.ImageUrl" alt="@item.Name" style="width:60px;height:60px;object-fit:cover;" class="rounded" />
-                        }
-                    </td>
-                    <td>@item.Name</td>
-                    <td>@item.Category?.Name</td>
-                    <td>@item.Quantity @item.Unit</td>
-                    <td>₹@item.Price</td>
-                    <td>@item.HarvestDate.ToShortDateString()</td>
-                    <td>
-                        @if (item.Status == AgriLink.Models.ProduceStatus.Available)
-                        {
-                            <span class="badge bg-success">Available</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">Sold Out</span>
-                        }
-                    </td>
-                    <td class="text-nowrap">
-                        <a asp-action="Edit" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-danger">Delete</a>
-                        <form asp-action="ToggleSoldOut" asp-route-id="@item.ProduceId" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-dark">
-                                @(item.Status == AgriLink.Models.ProduceStatus.Available ? "Mark Sold Out" : "Mark Available")
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Image</th>
+                        <th>Listing Details</th>
+                        <th>Category</th>
+                        <th>Stock Available</th>
+                        <th>Price</th>
+                        <th>Harvest Date</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4" style="width:70px;">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.Name" style="width:55px;height:55px;object-fit:cover;" class="rounded-3 shadow-sm" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light rounded-3 text-center d-flex align-items-center justify-content-center text-muted" style="width:55px;height:55px;">
+                                        🌱
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark fs-6">@item.Name</div>
+                                <small class="text-muted">📍 @item.Location</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success fw-semibold px-2 py-1">@item.Category?.Name</span>
+                            </td>
+                            <td>
+                                <strong>@item.Quantity</strong> <span class="text-muted">@item.Unit</span>
+                            </td>
+                            <td class="fw-bold text-success">
+                                ₹@item.Price <small class="text-muted fw-normal">/ @item.Unit</small>
+                            </td>
+                            <td class="text-muted small">
+                                @item.HarvestDate.ToString("MMM dd, yyyy")
+                            </td>
+                            <td>
+                                @if (item.Status == AgriLink.Models.ProduceStatus.Available)
+                                {
+                                    <span class="badge bg-success">Available</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Sold Out</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4 text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-danger me-1">Delete</a>
+                                <form asp-action="ToggleSoldOut" asp-route-id="@item.ProduceId" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-dark">
+                                        @(item.Status == AgriLink.Models.ProduceStatus.Available ? "Mark Sold Out" : "Mark Available")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
