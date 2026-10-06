@@ -1,8 +1,189 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model AgriLink.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "AgriLink - Direct Farm Fresh Marketplace";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Banner Section -->
+<div class="p-5 mb-4 bg-success bg-gradient text-white rounded-3 shadow-sm position-relative overflow-hidden">
+    <div class="container-fluid py-4 position-relative" style="z-index: 2;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-light text-success fw-bold px-3 py-2 mb-3 fs-6">🌾 Direct Farm to Table</span>
+                <h1 class="display-4 fw-bold mb-3">Fresh Local Produce, Direct From Farmers</h1>
+                <p class="fs-5 mb-4 text-white-50">
+                    AgriLink connects local agricultural producers directly with buyers. Discover fresh harvests at fair market prices with zero middleman markups.
+                </p>
+
+                <!-- Search Bar -->
+                <form asp-controller="Browse" asp-action="Index" method="get" class="mb-4">
+                    <div class="input-group input-group-lg shadow-sm">
+                        <input type="text" name="searchTerm" class="form-control border-0 px-4" placeholder="Search vegetables, fruits, grains, spices..." aria-label="Search produce">
+                        <button class="btn btn-warning fw-bold px-4 text-dark" type="submit">
+                            🔍 Search Produce
+                        </button>
+                    </div>
+                </form>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="Browse" asp-action="Index" class="btn btn-light btn-lg fw-semibold px-4">
+                        🛒 Explore Marketplace
+                    </a>
+                    @if (User.IsInRole("Farmer"))
+                    {
+                        <a asp-controller="Produce" asp-action="Create" class="btn btn-outline-light btn-lg fw-semibold px-4">
+                            + List Your Produce
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-light btn-lg fw-semibold px-4">
+                            Join as a Farmer or Buyer
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                <div class="bg-white text-dark p-4 rounded-3 shadow-lg">
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <h3 class="fw-bold text-success mb-0">@Model.TotalListingsCount</h3>
+                            <small class="text-muted text-uppercase fw-semibold" style="font-size:0.75rem;">Active Listings</small>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="fw-bold text-success mb-0">@Model.TotalFarmersCount</h3>
+                            <small class="text-muted text-uppercase fw-semibold" style="font-size:0.75rem;">Registered Farmers</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Quick-Select Section -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0">Browse by Category</h3>
+        <a asp-controller="Browse" asp-action="Index" class="text-success text-decoration-none fw-semibold">View All Categories &rarr;</a>
+    </div>
+
+    <div class="row row-cols-2 row-cols-md-4 g-3">
+        @foreach (var cat in Model.Categories)
+        {
+            <div class="col">
+                <a asp-controller="Browse" asp-action="Index" asp-route-categoryId="@cat.CategoryId" class="card text-decoration-none h-100 border-0 shadow-sm hover-shadow transition-all text-dark">
+                    <div class="card-body text-center py-4">
+                        <div class="fs-1 mb-2">
+                            @switch (cat.Name.ToLower())
+                            {
+                                case var n when n.Contains("veg"):
+                                    @:🥦
+                                    break;
+                                case var n when n.Contains("fruit"):
+                                    @:🍎
+                                    break;
+                                case var n when n.Contains("grain") || n.Contains("pulse"):
+                                    @:🌾
+                                    break;
+                                case var n when n.Contains("spice"):
+                                    @:🌶️
+                                    break;
+                                default:
+                                    @:🌱
+                                    break;
+                            }
+                        </div>
+                        <h5 class="card-title fw-bold mb-1">@cat.Name</h5>
+                        <p class="card-text text-muted small mb-0">@cat.Description</p>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Recent Listings Section -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0">Fresh Produce Available Now</h3>
+            <p class="text-muted mb-0">Harvested and ready for direct pickup or delivery</p>
+        </div>
+        <a asp-controller="Browse" asp-action="Index" class="btn btn-outline-success fw-semibold">See All Listings &rarr;</a>
+    </div>
+
+    @if (!Model.RecentListings.Any())
+    {
+        <div class="text-center py-5 bg-light rounded-3">
+            <div class="fs-1 text-muted mb-2">🚜</div>
+            <h5 class="text-muted">No produce listed yet</h5>
+            <p class="text-muted small">Farmers are preparing their fresh harvests. Check back soon!</p>
+            @if (User.IsInRole("Farmer"))
+            {
+                <a asp-controller="Produce" asp-action="Create" class="btn btn-success mt-2">+ Create First Listing</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var item in Model.RecentListings)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="bg-light text-center py-5 text-muted" style="height: 200px;">
+                                <div class="fs-1">🌱</div>
+                                <span>No Image Available</span>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-success bg-opacity-10 text-success fw-semibold px-2 py-1">@item.Category?.Name</span>
+                                <span class="fs-5 fw-bold text-success">₹@item.Price <small class="fs-6 text-muted fw-normal">/ @item.Unit</small></span>
+                            </div>
+                            <h5 class="card-title fw-bold mb-1">@item.Name</h5>
+                            <p class="text-muted small mb-2">
+                                📍 @item.Location
+                            </p>
+                            <p class="card-text text-truncate text-secondary small">
+                                @item.Description
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center pb-3 pt-0">
+                            <small class="text-muted">Available: <strong>@item.Quantity @item.Unit</strong></small>
+                            <a asp-controller="Browse" asp-action="Details" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-success fw-semibold">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Why AgriLink Platform Features -->
+<div class="row g-4 my-4 py-4 bg-light rounded-3 px-3">
+    <div class="col-md-4 text-center">
+        <div class="fs-1 text-success mb-2">🌱</div>
+        <h5 class="fw-bold">Direct Farmer Sourcing</h5>
+        <p class="text-muted small mb-0">Eliminate intermediary commission costs. Buyers get fresher produce, and farmers earn fair profits.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <div class="fs-1 text-success mb-2">📈</div>
+        <h5 class="fw-bold">Transparent Market Pricing</h5>
+        <p class="text-muted small mb-0">Access daily benchmark prices and historical price charts to make informed buying and selling decisions.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <div class="fs-1 text-success mb-2">🚜</div>
+        <h5 class="fw-bold">Verified Farm Profiles</h5>
+        <p class="text-muted small mb-0">Know where your food comes from. Learn about farm experience, location, and cultivation practices.</p>
+    </div>
 </div>
