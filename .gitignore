@@ -360,13 +360,8 @@ MigrationBackup/
 .ionide/
 
 # Fody - auto-generated XML schema
-<<<<<<< HEAD
-FodyWeavers.xsd.DS_Store
-.DS_Store
-=======
 FodyWeavers.xsd
 .DS_Store
 bin/
 obj/
 *.db
->>>>>>> 5a281eb (Update AgriLink controllers and project code)

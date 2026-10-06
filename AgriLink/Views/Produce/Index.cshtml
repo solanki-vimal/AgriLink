@@ -1,0 +1,70 @@
+@model IEnumerable<AgriLink.Models.Produce>
+
+@{
+    ViewData["Title"] = "My Listings";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">+ New Listing</a>
+</p>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">You haven't listed any produce yet.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Harvest Date</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td style="width:70px;">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.Name" style="width:60px;height:60px;object-fit:cover;" class="rounded" />
+                        }
+                    </td>
+                    <td>@item.Name</td>
+                    <td>@item.Category?.Name</td>
+                    <td>@item.Quantity @item.Unit</td>
+                    <td>₹@item.Price</td>
+                    <td>@item.HarvestDate.ToShortDateString()</td>
+                    <td>
+                        @if (item.Status == AgriLink.Models.ProduceStatus.Available)
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Sold Out</span>
+                        }
+                    </td>
+                    <td class="text-nowrap">
+                        <a asp-action="Edit" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-danger">Delete</a>
+                        <form asp-action="ToggleSoldOut" asp-route-id="@item.ProduceId" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-dark">
+                                @(item.Status == AgriLink.Models.ProduceStatus.Available ? "Mark Sold Out" : "Mark Available")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

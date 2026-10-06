@@ -1,4 +1,5 @@
 using AgriLink.Data;
+using AgriLink.Helpers;
 using AgriLink.Models;
 using AgriLink.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -26,100 +27,80 @@ namespace AgriLink.Controllers
             _environment = environment;
         }
 
-        // GET: Produce
+        // GET: Produce  (a Farmer's own listings only — "My Listings")
         public async Task<IActionResult> Index()
         {
             var farmerId = _userManager.GetUserId(User);
-            var listings = await _context.ProduceListings
+
+            var myListings = await _context.ProduceListings
                 .Include(p => p.Category)
                 .Where(p => p.FarmerId == farmerId)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
-            return View(listings);
+            return View(myListings);
         }
 
         // GET: Produce/Create
-        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var viewModel = new ProduceFormViewModel
-            {
-                HarvestDate = DateTime.Today,
-                Categories = await GetCategorySelectListAsync()
-            };
-
-            return View(viewModel);
+            await PopulateCategoriesDropDown();
+            return View(new ProduceFormViewModel());
         }
 
         // POST: Produce/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProduceFormViewModel model)
+        public async Task<IActionResult> Create(ProduceFormViewModel vm)
         {
-            var farmerId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(farmerId))
+            if (!ModelState.IsValid)
             {
-                return Challenge();
+                await PopulateCategoriesDropDown(vm.CategoryId);
+                return View(vm);
             }
 
-            if (ModelState.IsValid)
+            var produce = new Produce
             {
-                string? imageUrl = null;
-                if (model.ImageFile != null && model.ImageFile.Length > 0)
-                {
-                    imageUrl = await SaveProduceImageAsync(model.ImageFile);
-                }
+                FarmerId = _userManager.GetUserId(User),
+                CategoryId = vm.CategoryId,
+                Name = vm.Name,
+                Description = vm.Description,
+                Quantity = vm.Quantity,
+                Unit = vm.Unit,
+                Price = vm.Price,
+                HarvestDate = vm.HarvestDate,
+                Location = vm.Location,
+                Status = ProduceStatus.Available,
+                CreatedAt = DateTime.Now
+            };
 
-                var produce = new Produce
-                {
-                    FarmerId = farmerId,
-                    CategoryId = model.CategoryId,
-                    Name = model.Name,
-                    Description = model.Description,
-                    Quantity = model.Quantity,
-                    Unit = model.Unit,
-                    Price = model.Price,
-                    HarvestDate = model.HarvestDate,
-                    Location = model.Location,
-                    ImageUrl = imageUrl,
-                    Status = ProduceStatus.Available,
-                    CreatedAt = DateTime.Now
-                };
-
-                _context.ProduceListings.Add(produce);
-                await _context.SaveChangesAsync();
-
-                TempData["StatusMessage"] = $"Produce listing \"{produce.Name}\" created successfully.";
-                return RedirectToAction(nameof(Index));
+            if (vm.ImageFile != null)
+            {
+                produce.ImageUrl = await ImageUploadHelper.SaveImageAsync(vm.ImageFile, _environment, "produce");
             }
 
-            model.Categories = await GetCategorySelectListAsync(model.CategoryId);
-            return View(model);
+            _context.ProduceListings.Add(produce);
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = $"\"{produce.Name}\" listed successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Produce/Edit/5
-        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var produce = await _context.ProduceListings.FindAsync(id);
-            if (produce == null)
-            {
-                return NotFound();
-            }
+            if (produce == null) return NotFound();
 
-            // Ownership check: only the listing owner can edit
+            // Ownership check — a farmer can only edit their own listings
             if (produce.FarmerId != _userManager.GetUserId(User))
             {
                 return Forbid();
             }
 
-            var viewModel = new ProduceFormViewModel
+            var vm = new ProduceFormViewModel
             {
                 ProduceId = produce.ProduceId,
                 CategoryId = produce.CategoryId,
@@ -130,99 +111,78 @@ namespace AgriLink.Controllers
                 Price = produce.Price,
                 HarvestDate = produce.HarvestDate,
                 Location = produce.Location,
-                ExistingImageUrl = produce.ImageUrl,
-                Categories = await GetCategorySelectListAsync(produce.CategoryId)
+                ExistingImageUrl = produce.ImageUrl
             };
 
-            return View(viewModel);
+            await PopulateCategoriesDropDown(vm.CategoryId);
+            return View(vm);
         }
 
         // POST: Produce/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ProduceFormViewModel model)
+        public async Task<IActionResult> Edit(int id, ProduceFormViewModel vm)
         {
-            if (id != model.ProduceId)
-            {
-                return NotFound();
-            }
+            if (id != vm.ProduceId) return NotFound();
 
             var produce = await _context.ProduceListings.FindAsync(id);
-            if (produce == null)
-            {
-                return NotFound();
-            }
+            if (produce == null) return NotFound();
 
-            // Ownership check: only the listing owner can edit
             if (produce.FarmerId != _userManager.GetUserId(User))
             {
                 return Forbid();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // Auto-log to PriceHistory only when price changes
-                if (model.Price != produce.Price)
-                {
-                    var priceHistory = new PriceHistory
-                    {
-                        ProduceId = produce.ProduceId,
-                        OldPrice = produce.Price,
-                        NewPrice = model.Price,
-                        ChangedAt = DateTime.Now
-                    };
-                    _context.PriceHistories.Add(priceHistory);
-                    produce.Price = model.Price;
-                }
-
-                if (model.ImageFile != null && model.ImageFile.Length > 0)
-                {
-                    produce.ImageUrl = await SaveProduceImageAsync(model.ImageFile);
-                }
-
-                produce.CategoryId = model.CategoryId;
-                produce.Name = model.Name;
-                produce.Description = model.Description;
-                produce.Quantity = model.Quantity;
-                produce.Unit = model.Unit;
-                produce.HarvestDate = model.HarvestDate;
-                produce.Location = model.Location;
-
-                try
-                {
-                    _context.ProduceListings.Update(produce);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!await _context.ProduceListings.AnyAsync(p => p.ProduceId == id))
-                    {
-                        return NotFound();
-                    }
-                    throw;
-                }
-
-                TempData["StatusMessage"] = $"Produce listing \"{produce.Name}\" updated successfully.";
-                return RedirectToAction(nameof(Index));
+                vm.ExistingImageUrl = produce.ImageUrl;
+                await PopulateCategoriesDropDown(vm.CategoryId);
+                return View(vm);
             }
 
-            model.ExistingImageUrl = produce.ImageUrl;
-            model.Categories = await GetCategorySelectListAsync(model.CategoryId);
-            return View(model);
+            // Log to PriceHistory only if the asking price actually changed
+            if (produce.Price != vm.Price)
+            {
+                _context.PriceHistories.Add(new PriceHistory
+                {
+                    ProduceId = produce.ProduceId,
+                    OldPrice = produce.Price,
+                    NewPrice = vm.Price,
+                    ChangedAt = DateTime.Now
+                });
+            }
+
+            produce.CategoryId = vm.CategoryId;
+            produce.Name = vm.Name;
+            produce.Description = vm.Description;
+            produce.Quantity = vm.Quantity;
+            produce.Unit = vm.Unit;
+            produce.Price = vm.Price;
+            produce.HarvestDate = vm.HarvestDate;
+            produce.Location = vm.Location;
+
+            if (vm.ImageFile != null)
+            {
+                // Clean up the old file now that we're replacing it
+                ImageUploadHelper.DeleteImage(produce.ImageUrl, _environment);
+                produce.ImageUrl = await ImageUploadHelper.SaveImageAsync(vm.ImageFile, _environment, "produce");
+            }
+            // else: keep the existing ImageUrl untouched
+
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = $"\"{produce.Name}\" updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // POST: Produce/ToggleSoldOut/5
+        // POST: Produce/ToggleSoldOut/5  (quick manual override, per the hybrid design)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleSoldOut(int id)
         {
             var produce = await _context.ProduceListings.FindAsync(id);
-            if (produce == null)
-            {
-                return NotFound();
-            }
+            if (produce == null) return NotFound();
 
-            // Ownership check: only the listing owner can toggle status
             if (produce.FarmerId != _userManager.GetUserId(User))
             {
                 return Forbid();
@@ -234,29 +194,21 @@ namespace AgriLink.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["StatusMessage"] = $"Produce \"{produce.Name}\" marked as {(produce.Status == ProduceStatus.Available ? "Available" : "Sold Out")}.";
+            TempData["StatusMessage"] = $"\"{produce.Name}\" marked as {produce.Status}.";
             return RedirectToAction(nameof(Index));
         }
 
         // GET: Produce/Delete/5
-        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var produce = await _context.ProduceListings
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.ProduceId == id);
 
-            if (produce == null)
-            {
-                return NotFound();
-            }
+            if (produce == null) return NotFound();
 
-            // Ownership check: only the listing owner can delete
             if (produce.FarmerId != _userManager.GetUserId(User))
             {
                 return Forbid();
@@ -271,60 +223,36 @@ namespace AgriLink.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var produce = await _context.ProduceListings.FindAsync(id);
-            if (produce == null)
-            {
-                return NotFound();
-            }
+            if (produce == null) return NotFound();
 
-            // Ownership check: only the listing owner can delete
             if (produce.FarmerId != _userManager.GetUserId(User))
             {
                 return Forbid();
             }
 
+            // Produce -> Order is Restrict, so this will throw if orders exist against it
             try
             {
                 _context.ProduceListings.Remove(produce);
                 await _context.SaveChangesAsync();
-                TempData["StatusMessage"] = $"Produce listing \"{produce.Name}\" deleted successfully.";
+                ImageUploadHelper.DeleteImage(produce.ImageUrl, _environment);
+                TempData["StatusMessage"] = $"\"{produce.Name}\" deleted successfully.";
             }
             catch (DbUpdateException)
             {
-                TempData["StatusMessage"] = $"Cannot delete \"{produce.Name}\" — it is still linked to existing orders.";
+                TempData["StatusMessage"] =
+                    $"Cannot delete \"{produce.Name}\" — it has existing orders against it. Mark it Sold Out instead.";
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<IEnumerable<SelectListItem>> GetCategorySelectListAsync(int? selectedId = null)
+        // Helpers
+
+        private async Task PopulateCategoriesDropDown(int? selectedId = null)
         {
-            var categories = await _context.Categories
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-
-            return categories.Select(c => new SelectListItem
-            {
-                Value = c.CategoryId.ToString(),
-                Text = c.Name,
-                Selected = selectedId.HasValue && c.CategoryId == selectedId.Value
-            });
-        }
-
-        private async Task<string> SaveProduceImageAsync(IFormFile imageFile)
-        {
-            var uploadDir = Path.Combine(_environment.WebRootPath, "images", "produce");
-            Directory.CreateDirectory(uploadDir);
-
-            var extension = Path.GetExtension(imageFile.FileName);
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadDir, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return $"/images/produce/{uniqueFileName}";
+            var categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+            ViewBag.CategoryId = new SelectList(categories, "CategoryId", "Name", selectedId);
         }
     }
 }
