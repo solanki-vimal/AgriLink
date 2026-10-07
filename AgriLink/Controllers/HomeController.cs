@@ -33,8 +33,12 @@ namespace AgriLink.Controllers
             var totalListings = await _context.ProduceListings
                 .CountAsync(p => p.Status == ProduceStatus.Available && p.Quantity > 0);
 
-            var totalFarmers = await _context.FarmerProfiles
-                .CountAsync();
+            var totalFarmers = await (from ur in _context.UserRoles
+                                      join r in _context.Roles on ur.RoleId equals r.Id
+                                      where r.NormalizedName == "FARMER" || r.Name == "Farmer"
+                                      select ur.UserId)
+                                     .Distinct()
+                                     .CountAsync();
 
             var viewModel = new HomeViewModel
             {
