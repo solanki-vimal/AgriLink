@@ -1,0 +1,86 @@
+@model IEnumerable<AgriLink.Models.Order>
+@using AgriLink.Models
+
+@{
+    ViewData["Title"] = "Manage Orders";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No orders have been placed on your listings yet.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Produce</th>
+                <th>Buyer</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Order Date</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Produce?.Name</td>
+                    <td>@order.Buyer?.FullName</td>
+                    <td>@order.QuantityOrdered @order.Produce?.Unit</td>
+                    <td>₹@order.TotalPrice</td>
+                    <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @{
+                            var badgeClass = order.Status switch
+                            {
+                                OrderStatus.Pending => "bg-warning text-dark",
+                                OrderStatus.Accepted => "bg-primary",
+                                OrderStatus.Completed => "bg-success",
+                                OrderStatus.Rejected => "bg-danger",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @badgeClass">@order.Status</span>
+                    </td>
+                    <td class="text-nowrap">
+                        @if (order.Status == OrderStatus.Pending)
+                        {
+                            <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                <input type="hidden" name="orderId" value="@order.OrderId" />
+                                <input type="hidden" name="newStatus" value="@OrderStatus.Accepted" />
+                                <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                            </form>
+                            <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                <input type="hidden" name="orderId" value="@order.OrderId" />
+                                <input type="hidden" name="newStatus" value="@OrderStatus.Rejected" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                            </form>
+                        }
+                        else if (order.Status == OrderStatus.Accepted)
+                        {
+                            <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                <input type="hidden" name="orderId" value="@order.OrderId" />
+                                <input type="hidden" name="newStatus" value="@OrderStatus.Completed" />
+                                <button type="submit" class="btn btn-sm btn-success">Mark Completed</button>
+                            </form>
+                            <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                <input type="hidden" name="orderId" value="@order.OrderId" />
+                                <input type="hidden" name="newStatus" value="@OrderStatus.Rejected" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">No actions</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

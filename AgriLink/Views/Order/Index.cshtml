@@ -1,0 +1,53 @@
+@model IEnumerable<AgriLink.Models.Order>
+@using AgriLink.Models
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">You haven't placed any orders yet. <a asp-controller="Browse" asp-action="Index">Browse the marketplace</a>.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Produce</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Order Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Produce?.Name</td>
+                    <td>@order.Produce?.Category?.Name</td>
+                    <td>@order.QuantityOrdered @order.Produce?.Unit</td>
+                    <td>₹@order.TotalPrice</td>
+                    <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @{
+                            var badgeClass = order.Status switch
+                            {
+                                OrderStatus.Pending => "bg-warning text-dark",
+                                OrderStatus.Accepted => "bg-primary",
+                                OrderStatus.Completed => "bg-success",
+                                OrderStatus.Rejected => "bg-danger",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @badgeClass">@order.Status</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
