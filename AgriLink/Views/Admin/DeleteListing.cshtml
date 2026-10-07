@@ -1,0 +1,39 @@
+@model AgriLink.Models.Produce
+
+@{
+    ViewData["Title"] = "Remove Listing";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>Are you sure you want to remove this listing?</h3>
+<div class="row">
+    <div class="col-md-6">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" style="width:120px;height:120px;object-fit:cover;" class="rounded mb-3" />
+        }
+        <dl class="row">
+            <dt class="col-sm-4">Name</dt>
+            <dd class="col-sm-8">@Model.Name</dd>
+
+            <dt class="col-sm-4">Category</dt>
+            <dd class="col-sm-8">@Model.Category?.Name</dd>
+
+            <dt class="col-sm-4">Farmer</dt>
+            <dd class="col-sm-8">@Model.Farmer?.FullName</dd>
+
+            <dt class="col-sm-4">Quantity</dt>
+            <dd class="col-sm-8">@Model.Quantity @Model.Unit</dd>
+
+            <dt class="col-sm-4">Price</dt>
+            <dd class="col-sm-8">₹@Model.Price</dd>
+        </dl>
+
+        <form asp-action="DeleteListing" method="post">
+            <input type="hidden" asp-for="ProduceId" />
+            <button type="submit" class="btn btn-danger">Remove Listing</button>
+            <a asp-action="Listings" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

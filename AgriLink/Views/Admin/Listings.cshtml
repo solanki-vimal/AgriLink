@@ -1,0 +1,62 @@
+@model IEnumerable<AgriLink.Models.Produce>
+@using AgriLink.Models
+@{
+    ViewData["Title"] = "All Listings";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No listings on the platform yet.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Farmer</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Listed On</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td style="width:60px;">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.Name" style="width:50px;height:50px;object-fit:cover;" class="rounded" />
+                        }
+                    </td>
+                    <td>@item.Name</td>
+                    <td>@item.Category?.Name</td>
+                    <td>@item.Farmer?.FullName</td>
+                    <td>@item.Quantity @item.Unit</td>
+                    <td>₹@item.Price</td>
+                    <td>
+                        @if (item.Status == ProduceStatus.Available)
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Sold Out</span>
+                        }
+                    </td>
+                    <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        <a asp-action="DeleteListing" asp-route-id="@item.ProduceId" class="btn btn-sm btn-outline-danger">Remove</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
