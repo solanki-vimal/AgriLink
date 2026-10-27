@@ -1,0 +1,60 @@
+@model AgriLink.Models.MarketPrice
+
+@{
+    ViewData["Title"] = "Edit Market Price";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="alert alert-info">
+    Saving marks this entry as <strong>Manual</strong>, so the Agmarknet sync will no longer overwrite it.
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="MarketPriceId" />
+
+            <div class="mb-3">
+                <label asp-for="CommodityName" class="form-label"></label>
+                <input asp-for="CommodityName" class="form-control" />
+                <span asp-validation-for="CommodityName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CategoryId" class="form-label"></label>
+                <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId">
+                    <option value="">-- None --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Date" class="form-label"></label>
+                <input asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-7 mb-3">
+                    <label asp-for="PricePerUnit" class="form-label"></label>
+                    <input asp-for="PricePerUnit" class="form-control" />
+                    <span asp-validation-for="PricePerUnit" class="text-danger"></span>
+                </div>
+                <div class="col-5 mb-3">
+                    <label asp-for="Unit" class="form-label"></label>
+                    <input asp-for="Unit" class="form-control" />
+                    <span asp-validation-for="Unit" class="text-danger"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

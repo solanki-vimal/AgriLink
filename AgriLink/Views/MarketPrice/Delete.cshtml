@@ -1,0 +1,30 @@
+@model AgriLink.Models.MarketPrice
+
+@{
+    ViewData["Title"] = "Delete Market Price";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>Are you sure you want to delete this entry?</h3>
+<div>
+    <dl class="row">
+        <dt class="col-sm-3">Commodity</dt>
+        <dd class="col-sm-9">@Model.CommodityName</dd>
+
+        <dt class="col-sm-3">Date</dt>
+        <dd class="col-sm-9">@Model.Date.ToString("MMM dd, yyyy")</dd>
+
+        <dt class="col-sm-3">Rate</dt>
+        <dd class="col-sm-9">₹@Model.PricePerUnit / @Model.Unit</dd>
+
+        <dt class="col-sm-3">Source</dt>
+        <dd class="col-sm-9">@Model.Source</dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="MarketPriceId" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

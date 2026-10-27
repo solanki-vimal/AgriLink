@@ -1,0 +1,85 @@
+@model IEnumerable<AgriLink.Models.MarketPrice>
+
+@{
+    ViewData["Title"] = "Manage Market Prices";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="fw-bold mb-1">Live mandi rates (Agmarknet)</h5>
+        <p class="text-muted small mb-3">
+            Fetches the latest @ViewBag.State rates from data.gov.in, converts ₹/quintal to ₹/kg,
+            and stores the median across mandis. Rates you entered manually are never overwritten.
+        </p>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <form asp-action="Sync" method="post">
+                <button type="submit" class="btn btn-success">Sync tracked commodities</button>
+            </form>
+            <form asp-action="Sync" method="post" class="d-flex gap-2">
+                <input name="commodity" class="form-control" placeholder="e.g. Cauliflower" required maxlength="100" />
+                <button type="submit" class="btn btn-outline-success text-nowrap">Fetch one</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">+ Manual Entry</a>
+</p>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No market price entries yet. Run a sync or add one manually.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Commodity</th>
+                <th>Rate</th>
+                <th>Range</th>
+                <th>Markets</th>
+                <th>Source</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Date.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @item.CommodityName
+                        @if (item.Category != null)
+                        {
+                            <div class="text-muted small">@item.Category.Name</div>
+                        }
+                    </td>
+                    <td class="fw-semibold">₹@item.PricePerUnit / @item.Unit</td>
+                    <td>
+                        @if (item.MinPrice != null && item.MaxPrice != null)
+                        {
+                            <span>₹@item.MinPrice – ₹@item.MaxPrice</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td>@(item.MarketCount?.ToString() ?? "—")</td>
+                    <td>
+                        <span class="badge @(item.Source == "Manual" ? "bg-secondary" : "bg-success")">@item.Source</span>
+                    </td>
+                    <td class="text-nowrap">
+                        <a asp-action="Edit" asp-route-id="@item.MarketPriceId" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.MarketPriceId" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
