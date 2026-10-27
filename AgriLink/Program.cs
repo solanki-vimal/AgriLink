@@ -1,4 +1,5 @@
 using AgriLink.Data;
+using AgriLink.Helpers;
 using AgriLink.Models;
 using AgriLink.Services;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +24,9 @@ builder.Services.AddHttpClient<IMarketPriceProvider, AgmarknetPriceProvider>(cli
 }).RemoveAllLoggers(); // the request URL contains the API key, so don't log it
 
 var app = builder.Build();
+
+// Initialize Cloudinary if credentials are provided in configuration (otherwise falls back to local storage)
+ImageUploadHelper.Initialize(app.Configuration);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
