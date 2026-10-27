@@ -1,6 +1,101 @@
-﻿@{
+@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="row justify-content-center my-4">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                <div class="fs-1 text-success">🛡️</div>
+                <div>
+                    <h1 class="fw-bold mb-1">AgriLink Privacy Policy</h1>
+                    <p class="text-muted mb-0">Committed to protecting the data of our farmers, buyers, and agricultural communities.</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 fw-semibold">Last Updated: October 2026</span>
+            </div>
+
+            <section class="mb-5">
+                <h4 class="fw-bold text-success mb-3">1. Overview & Commitment</h4>
+                <p class="text-secondary lead">
+                    AgriLink connects local agricultural producers directly with buyers. We believe trust and transparency are the backbone of farming. This policy explains what information we collect, how it is used to empower direct agricultural trade, and how we keep it safe.
+                </p>
+            </section>
+
+            <section class="mb-5">
+                <h4 class="fw-bold text-success mb-3">2. Information We Collect</h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0 p-3">
+                            <h6 class="fw-bold text-dark">🌾 For Farmers</h6>
+                            <ul class="text-secondary small mb-0 ps-3">
+                                <li>Account credentials: Full name, phone number, email, and farm location address.</li>
+                                <li>Farm profile details: Farm name, acreage size, years of farming experience, bio, and farm imagery.</li>
+                                <li>Produce listings: Crop name, category, quantity, harvest dates, unit pricing, and produce photos.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0 p-3">
+                            <h6 class="fw-bold text-dark">🛒 For Buyers</h6>
+                            <ul class="text-secondary small mb-0 ps-3">
+                                <li>Account credentials: Full name, delivery address, phone number, and email.</li>
+                                <li>Order transactions: Quantities ordered, order status history, and total amounts.</li>
+                                <li>Search & browse interactions across marketplace categories and mandi rates.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h4 class="fw-bold text-success mb-3">3. How Your Information Is Used</h4>
+                <ul class="text-secondary ps-3">
+                    <li class="mb-2"><strong>Direct Trade Facilitation:</strong> To allow buyers to discover nearby produce, verify farmer profiles, and place orders directly.</li>
+                    <li class="mb-2"><strong>Fair Pricing & Price History:</strong> Produce price changes are logged to render transparent price-trend graphs powered by Chart.js and Government Agmarknet reference rates.</li>
+                    <li class="mb-2"><strong>Order Fulfillment:</strong> To enable farmers to review, accept, and deliver produce orders to buyers.</li>
+                    <li class="mb-2"><strong>Platform Security:</strong> Role-based authorization ensures buyers, farmers, and admins only access permitted platform actions.</li>
+                </ul>
+            </section>
+
+            <section class="mb-5">
+                <h4 class="fw-bold text-success mb-3">4. Data Sharing & Third Parties</h4>
+                <p class="text-secondary">
+                    AgriLink does <strong>not</strong> sell, rent, or trade your personal information to third-party advertisers. Information is only shared between transacting parties:
+                </p>
+                <div class="alert alert-success bg-opacity-10 border-success text-dark">
+                    <strong>Farmer & Buyer Visibility:</strong> When an order is placed, the farmer receives the buyer's delivery contact details to coordinate logistics, and the buyer sees the farmer's verified farm profile.
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h4 class="fw-bold text-success mb-3">5. Data Protection & Security</h4>
+                <p class="text-secondary">
+                    We employ industry-standard security measures including:
+                </p>
+                <ul class="text-secondary ps-3">
+                    <li>Secure password hashing and session encryption using ASP.NET Core Identity.</li>
+                    <li>Anti-forgery token verification (`[ValidateAntiForgeryToken]`) across all forms to guard against Cross-Site Request Forgery (CSRF).</li>
+                    <li>Strict role and resource ownership validation on every controller action.</li>
+                </ul>
+            </section>
+
+            <section class="pt-3 border-top">
+                <h4 class="fw-bold text-success mb-2">6. Contact Support</h4>
+                <p class="text-muted mb-3">
+                    Have questions or need assistance regarding your account or data? Reach out to our team:
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="mailto:support@agrilink.local" class="btn btn-outline-success btn-sm">
+                        ✉️ support@agrilink.local
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-success btn-sm">
+                        🏠 Return to Home
+                    </a>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

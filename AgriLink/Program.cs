@@ -1,5 +1,6 @@
 using AgriLink.Data;
 using AgriLink.Models;
+using AgriLink.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,11 +17,17 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddHttpClient<IMarketPriceProvider, AgmarknetPriceProvider>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+}).RemoveAllLoggers(); // the request URL contains the API key, so don't log it
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
 }
 else
@@ -29,6 +36,9 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// Intercept 404, 403, 500 status codes and re-execute through our friendly status handler
+app.UseStatusCodePagesWithReExecute("/Home/StatusCodeHandler/{0}");
 
 app.UseHttpsRedirection();
 app.UseRouting();

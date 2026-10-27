@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Page Not Found";
+}
+
+<div class="row justify-content-center my-5">
+    <div class="col-md-8 col-lg-6 text-center">
+        <div class="card border-0 shadow-sm p-4 p-md-5">
+            <div class="display-1 text-success fw-bold mb-3">404</div>
+            <div class="fs-1 mb-3">🌱 🚜</div>
+            <h2 class="fw-bold mb-3">Oops! Produce or Page Not Found</h2>
+            <p class="text-muted mb-4 lead">
+                The harvest listing, farm profile, or page you are looking for might have been sold out, removed, or the link has changed.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-success px-4 py-2 fw-semibold">
+                    🏠 Return Home
+                </a>
+                <a asp-controller="Browse" asp-action="Index" class="btn btn-success px-4 py-2 fw-semibold">
+                    🛒 Browse Marketplace
+                </a>
+            </div>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <div class="mt-4 pt-3 border-top text-muted small">
+                    Looking for your activities? 
+                    @if (User.IsInRole("Farmer"))
+                    {
+                        <a asp-controller="Produce" asp-action="Index" class="text-success fw-semibold text-decoration-none">My Produce</a>
+                        <span> | </span>
+                        <a asp-controller="Order" asp-action="Manage" class="text-success fw-semibold text-decoration-none">Manage Orders</a>
+                    }
+                    else if (User.IsInRole("Buyer"))
+                    {
+                        <a asp-controller="Order" asp-action="Index" class="text-success fw-semibold text-decoration-none">My Orders</a>
+                    }
+                    else if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="Users" class="text-success fw-semibold text-decoration-none">Admin Panel</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
