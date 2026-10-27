@@ -195,11 +195,25 @@ namespace AgriLink.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MarketPriceId"));
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<string>("CommodityName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("MarketCount")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("MaxPrice")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("MinPrice")
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("PricePerUnit")
                         .HasColumnType("decimal(10,2)");
@@ -207,6 +221,11 @@ namespace AgriLink.Migrations
                     b.Property<string>("SetByAdminId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -499,8 +518,7 @@ namespace AgriLink.Migrations
                     b.HasOne("AgriLink.Models.Category", "Category")
                         .WithMany("MarketPrices")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AgriLink.Models.ApplicationUser", "SetByAdmin")
                         .WithMany("MarketPricesSet")
