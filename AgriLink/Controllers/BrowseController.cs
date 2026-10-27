@@ -120,11 +120,21 @@ namespace AgriLink.Controllers
                 .OrderBy(ph => ph.ChangedAt)
                 .ToListAsync();
 
-            // Reference Market Price for category
-            var marketBenchmark = await _context.MarketPrices
-                .Where(mp => mp.CategoryId == produce.CategoryId)
-                .OrderByDescending(mp => mp.Date)
-                .FirstOrDefaultAsync();
+            // Reference market rate: match this listing's name against commodity names
+            // (e.g. "Alphonso Mango" contains "Mango"). Longest match wins, then newest.
+            // Filtered in memory - the recent window is only a handful of rows, and it
+            // keeps the case-insensitive "name contains commodity" logic simple.
+            var recentCutoff = DateTime.Today.AddDays(-14);
+            var recentPrices = await _context.MarketPrices
+                .Where(mp => mp.Date >= recentCutoff)
+                .ToListAsync();
+
+            var marketBenchmark = recentPrices
+                .Where(mp => !string.IsNullOrWhiteSpace(mp.CommodityName) &&
+                             produce.Name.Contains(mp.CommodityName, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(mp => mp.CommodityName.Length)
+                .ThenByDescending(mp => mp.Date)
+                .FirstOrDefault();
 
             // Prepare Chart.js data
             var chartLabels = new List<string>();

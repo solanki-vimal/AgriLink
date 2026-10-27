@@ -91,9 +91,39 @@
                 </div>
                 @if (Model.MarketPriceBenchmark != null)
                 {
-                    <span class="badge bg-info text-dark fw-semibold">
-                        Daily Benchmark: ₹@Model.MarketPriceBenchmark.PricePerUnit / @Model.MarketPriceBenchmark.Unit
-                    </span>
+                    var bm = Model.MarketPriceBenchmark;
+                    var sameUnit = string.Equals(bm.Unit, Model.Produce.Unit, StringComparison.OrdinalIgnoreCase);
+                    var diff = Model.Produce.Price - bm.PricePerUnit;
+
+                    <div class="text-end">
+                        <span class="badge bg-info text-dark fw-semibold">
+                            Market rate (@bm.CommodityName): ₹@bm.PricePerUnit / @bm.Unit
+                        </span>
+                        <div class="small text-muted mt-1">
+                            @bm.Source · @bm.Date.ToString("MMM dd")
+                            @if (bm.MarketCount != null)
+                            {
+                                <text> · median of @bm.MarketCount mandis</text>
+                            }
+                        </div>
+                        @if (sameUnit)
+                        {
+                            <div class="small fw-semibold mt-1">
+                                @if (diff > 0)
+                                {
+                                    <span class="text-danger">₹@diff.ToString("0.##") above market</span>
+                                }
+                                else if (diff < 0)
+                                {
+                                    <span class="text-success">₹@((-diff).ToString("0.##")) below market</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">At market rate</span>
+                                }
+                            </div>
+                        }
+                    </div>
                 }
             </div>
 
