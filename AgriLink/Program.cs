@@ -60,17 +60,43 @@ app.MapControllerRoute(
 app.MapRazorPages()
    .WithStaticAssets();
 
-// Seed Farmer / Buyer / Admin roles on startup
+// Seed Farmer / Buyer / Admin roles, and an Admin user (credentials from environment), on startup
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roleNames = { "Farmer", "Buyer", "Admin" };
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
+    // 1. Ensure all roles exist
+    string[] roleNames = { "Farmer", "Buyer", "Admin" };
     foreach (var roleName in roleNames)
     {
         if (!await roleManager.RoleExistsAsync(roleName))
-        {
             await roleManager.CreateAsync(new IdentityRole(roleName));
+    }
+
+    // 2. Seed Admin user only if credentials are supplied via environment / user secrets
+    //    Never hardcoded — set AdminSeed:Email and AdminSeed:Password in:
+    //      Local  → dotnet user-secrets
+    //      Render → Environment Variables dashboard
+    var adminEmail    = app.Configuration["AdminSeed:Email"];
+    var adminPassword = app.Configuration["AdminSeed:Password"];
+
+    if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
+    {
+        if (await userManager.FindByEmailAsync(adminEmail) == null)
+        {
+            var adminUser = new ApplicationUser
+            {
+                UserName  = adminEmail,
+                Email     = adminEmail,
+                FullName  = "AgriLink Admin",
+                Address   = "Platform HQ",
+                CreatedAt = DateTime.Now
+            };
+
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }
