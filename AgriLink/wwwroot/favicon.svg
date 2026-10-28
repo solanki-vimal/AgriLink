@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#28a745" />
+      <stop offset="100%" stop-color="#155724" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffc107" />
+      <stop offset="100%" stop-color="#fd7e14" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="46" fill="#f8fdf9" stroke="#28a745" stroke-width="4"/>
+
+  <!-- Plant Stem -->
+  <path d="M50 78 Q50 48 50 28" stroke="#1e7e34" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Left Green Sprout Leaf -->
+  <path d="M50 56 C32 54 22 40 28 26 C42 26 48 42 50 56 Z" fill="url(#leafGrad)"/>
+
+  <!-- Right Golden Grain Ear / Leaf -->
+  <path d="M50 46 C68 44 78 30 72 16 C58 16 52 32 50 46 Z" fill="url(#goldGrad)"/>
+
+  <!-- Center Top Leaf -->
+  <path d="M50 36 C42 22 45 10 50 6 C55 10 58 22 50 36 Z" fill="#28a745"/>
+
+  <!-- Ground Soil Base -->
+  <ellipse cx="50" cy="78" rx="20" ry="5" fill="#8d6e63"/>
+</svg>
