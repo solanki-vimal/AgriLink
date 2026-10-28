@@ -96,7 +96,7 @@ namespace AgriLink.Controllers
                 return View(vm);
             }
 
-            var buyerId = _userManager.GetUserId(User);
+            var buyerId = _userManager.GetUserId(User)!;
 
             var order = new Order
             {
@@ -120,7 +120,7 @@ namespace AgriLink.Controllers
         [Authorize(Roles = "Buyer")]
         public async Task<IActionResult> Index()
         {
-            var buyerId = _userManager.GetUserId(User);
+            var buyerId = _userManager.GetUserId(User)!;
 
             var orders = await _context.Orders
                 .Include(o => o.Produce)

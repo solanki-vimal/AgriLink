@@ -12,7 +12,7 @@ namespace AgriLink.Models
         [Required(ErrorMessage = "Commodity name is required.")]
         [StringLength(100)]
         [Display(Name = "Commodity")]
-        public string CommodityName { get; set; }
+        public string CommodityName { get; set; } = string.Empty;
 
         // Optional grouping only - the benchmark lookup matches on CommodityName.
         [Display(Name = "Category (optional)")]
@@ -23,7 +23,7 @@ namespace AgriLink.Models
 
         // FK: User (Admin who entered it, or who triggered the sync)
         [Required]
-        public string SetByAdminId { get; set; }
+        public string SetByAdminId { get; set; } = null!;
 
         [ForeignKey("SetByAdminId")]
         public ApplicationUser? SetByAdmin { get; set; }
@@ -40,7 +40,7 @@ namespace AgriLink.Models
 
         [Required]
         [StringLength(20)]
-        public string Unit { get; set; }
+        public string Unit { get; set; } = string.Empty;
 
         // Filled only by the Agmarknet sync (lowest/highest rate seen across mandis)
         [Column(TypeName = "decimal(10,2)")]

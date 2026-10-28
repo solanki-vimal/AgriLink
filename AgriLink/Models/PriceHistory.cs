@@ -10,7 +10,7 @@ namespace AgriLink.Models
         public int ProduceId { get; set; }
 
         [ForeignKey("ProduceId")]
-        public Produce Produce { get; set; }
+        public Produce Produce { get; set; } = null!;
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal OldPrice { get; set; }

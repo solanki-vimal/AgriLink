@@ -11,11 +11,11 @@ namespace AgriLink.Models
         [StringLength(100, MinimumLength = 3,
             ErrorMessage = "Full name must be between 3 and 100 characters.")]
         [Display(Name = "Full Name")]
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Address is required.")]
         [StringLength(200)]
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
 
         [Display(Name = "Profile Image")]
         public string? ProfileImageUrl { get; set; }

@@ -41,16 +41,26 @@
                 <span asp-validation-for="Input.Role" class="text-danger"></span>
             </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
-                <label asp-for="Input.Password"></label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            <div class="input-group mb-3">
+                <div class="form-floating flex-grow-1">
+                    <input asp-for="Input.Password" class="form-control" id="regPassword" autocomplete="new-password" />
+                    <label asp-for="Input.Password"></label>
+                </div>
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('regPassword', this)" tabindex="-1" title="Show / hide password">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <span asp-validation-for="Input.Password" class="text-danger w-100"></span>
             </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
-                <label asp-for="Input.ConfirmPassword"></label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            <div class="input-group mb-3">
+                <div class="form-floating flex-grow-1">
+                    <input asp-for="Input.ConfirmPassword" class="form-control" id="regConfirmPassword" autocomplete="new-password" />
+                    <label asp-for="Input.ConfirmPassword"></label>
+                </div>
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('regConfirmPassword', this)" tabindex="-1" title="Show / hide password">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger w-100"></span>
             </div>
 
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
@@ -64,4 +74,17 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+    </script>
 }

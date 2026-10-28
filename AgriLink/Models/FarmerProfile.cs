@@ -7,12 +7,12 @@ namespace AgriLink.Models
     {
         [Key]
         [ForeignKey("User")]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = null!;
 
         [Required(ErrorMessage = "Farm name is required.")]
         [StringLength(100)]
         [Display(Name = "Farm Name")]
-        public string FarmName { get; set; }
+        public string FarmName { get; set; } = string.Empty;
 
         [StringLength(500)]
         public string? Bio { get; set; }
@@ -20,7 +20,7 @@ namespace AgriLink.Models
         [Required(ErrorMessage = "Farm location is required.")]
         [StringLength(150)]
         [Display(Name = "Farm Location")]
-        public string FarmLocation { get; set; }
+        public string FarmLocation { get; set; } = string.Empty;
 
         [Range(0, 10000)]
         [Column(TypeName = "decimal(6,2)")]
@@ -37,6 +37,6 @@ namespace AgriLink.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Navigation property back to the owning user
-        public ApplicationUser User { get; set; }
+        public ApplicationUser User { get; set; } = null!;
     }
 }

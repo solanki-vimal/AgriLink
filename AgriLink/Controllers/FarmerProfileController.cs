@@ -1,4 +1,4 @@
-﻿using AgriLink.Data;
+using AgriLink.Data;
 using AgriLink.Helpers;
 using AgriLink.Models;
 using AgriLink.ViewModels;
@@ -29,7 +29,7 @@ namespace AgriLink.Controllers
         // GET: FarmerProfile  ("My Farm Profile")
         public async Task<IActionResult> Index()
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User)!;
 
             var profile = await _context.FarmerProfiles
                 .FirstOrDefaultAsync(fp => fp.UserId == userId);
@@ -47,7 +47,7 @@ namespace AgriLink.Controllers
         // GET: FarmerProfile/Edit  (doubles as Create, since it's 1-to-1)
         public async Task<IActionResult> Edit()
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User)!;
 
             var existing = await _context.FarmerProfiles
                 .FirstOrDefaultAsync(fp => fp.UserId == userId);
@@ -73,7 +73,7 @@ namespace AgriLink.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(FarmerProfileFormViewModel vm)
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User)!;
             // Force UserId server-side — never trust it from the form.
             vm.UserId = userId;
 

@@ -20,14 +20,14 @@ namespace AgriLink.Models
         public int ProduceId { get; set; }
 
         [ForeignKey("ProduceId")]
-        public Produce Produce { get; set; }
+        public Produce Produce { get; set; } = null!;
 
         // FK: User (Buyer)
         [Required]
-        public string BuyerId { get; set; }
+        public string BuyerId { get; set; } = null!;
 
         [ForeignKey("BuyerId")]
-        public ApplicationUser Buyer { get; set; }
+        public ApplicationUser Buyer { get; set; } = null!;
 
         [Required]
         [Range(0.1, 100000, ErrorMessage = "Order quantity must be greater than 0.")]

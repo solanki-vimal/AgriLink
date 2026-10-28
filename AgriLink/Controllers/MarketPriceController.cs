@@ -70,7 +70,7 @@ namespace AgriLink.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var adminId = _userManager.GetUserId(User);
+            var adminId = _userManager.GetUserId(User)!;
             int added = 0, updated = 0, keptManual = 0;
             var noData = new List<string>();
             string? failure = null;
@@ -176,7 +176,7 @@ namespace AgriLink.Controllers
 
             // Server-controlled fields - never taken from the form
             marketPrice.Date = marketPrice.Date.Date;
-            marketPrice.SetByAdminId = _userManager.GetUserId(User);
+            marketPrice.SetByAdminId = _userManager.GetUserId(User)!;
             marketPrice.Source = ManualSource;
 
             _context.MarketPrices.Add(marketPrice);
@@ -231,7 +231,7 @@ namespace AgriLink.Controllers
             existing.Date = posted.Date.Date;
             existing.PricePerUnit = posted.PricePerUnit;
             existing.Unit = posted.Unit;
-            existing.SetByAdminId = _userManager.GetUserId(User);
+            existing.SetByAdminId = _userManager.GetUserId(User)!;
 
             // An admin edit makes this a manual rate: the feed's range no longer
             // describes it, and the next sync must not overwrite the correction.

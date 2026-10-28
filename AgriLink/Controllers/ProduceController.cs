@@ -61,7 +61,7 @@ namespace AgriLink.Controllers
 
             var produce = new Produce
             {
-                FarmerId = _userManager.GetUserId(User),
+                FarmerId = _userManager.GetUserId(User)!,
                 CategoryId = vm.CategoryId,
                 Name = vm.Name,
                 Description = vm.Description,

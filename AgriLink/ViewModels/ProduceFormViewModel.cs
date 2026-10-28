@@ -13,7 +13,7 @@ namespace AgriLink.ViewModels
 
         [Required(ErrorMessage = "Produce name is required.")]
         [StringLength(100, MinimumLength = 2)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [StringLength(500)]
         public string? Description { get; set; }
@@ -24,7 +24,7 @@ namespace AgriLink.ViewModels
 
         [Required(ErrorMessage = "Unit is required (e.g. kg, quintal, dozen).")]
         [StringLength(20)]
-        public string Unit { get; set; }
+        public string Unit { get; set; } = string.Empty;
 
         [Required]
         [Range(0.01, 100000, ErrorMessage = "Price must be greater than 0.")]
@@ -38,7 +38,7 @@ namespace AgriLink.ViewModels
 
         [Required]
         [StringLength(100)]
-        public string Location { get; set; }
+        public string Location { get; set; } = string.Empty;
 
         [Display(Name = "Produce Image")]
         public IFormFile? ImageFile { get; set; }

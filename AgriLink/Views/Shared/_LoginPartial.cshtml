@@ -5,7 +5,7 @@
 @inject UserManager<ApplicationUser> UserManager
 
 @{
-    ApplicationUser currentUser = null;
+    ApplicationUser? currentUser = null;
     IList<string> userRoles = new List<string>();
     if (SignInManager.IsSignedIn(User))
     {

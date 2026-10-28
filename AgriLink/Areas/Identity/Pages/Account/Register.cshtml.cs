@@ -20,48 +20,48 @@ namespace AgriLink.Areas.Identity.Pages.Account
         }
 
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new();
 
-        public string ReturnUrl { get; set; }
+        public string? ReturnUrl { get; set; }
 
         public class InputModel
         {
             [Required(ErrorMessage = "Full name is required.")]
             [StringLength(100, MinimumLength = 3)]
             [Display(Name = "Full Name")]
-            public string FullName { get; set; }
+            public string FullName { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Address is required.")]
             [StringLength(200)]
-            public string Address { get; set; }
+            public string Address { get; set; } = string.Empty;
 
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
-            public string Email { get; set; }
+            public string Email { get; set; } = string.Empty;
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
-            public string Password { get; set; }
+            public string Password { get; set; } = string.Empty;
 
             [DataType(DataType.Password)]
             [Display(Name = "Confirm Password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
+            public string ConfirmPassword { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Please select a role.")]
             [Display(Name = "I am registering as a")]
-            public string Role { get; set; } // "Farmer" or "Buyer" only — Admin is not self-service
+            public string Role { get; set; } = string.Empty; // "Farmer" or "Buyer" only — Admin is not self-service
         }
 
-        public void OnGet(string returnUrl = null)
+        public void OnGet(string? returnUrl = null)
         {
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
 

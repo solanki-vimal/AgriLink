@@ -1,4 +1,4 @@
-using AgriLink.Data;
+    using AgriLink.Data;
 using AgriLink.Helpers;
 using AgriLink.Models;
 using AgriLink.Services;
@@ -65,6 +65,8 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var logger      = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+                          .CreateLogger("AdminSeed");
 
     // 1. Ensure all roles exist
     string[] roleNames = { "Farmer", "Buyer", "Admin" };
@@ -77,7 +79,9 @@ using (var scope = app.Services.CreateScope())
     // 2. Seed Admin user only if credentials are supplied via environment / user secrets
     //    Never hardcoded — set AdminSeed:Email and AdminSeed:Password in:
     //      Local  → dotnet user-secrets
-    //      Render → Environment Variables dashboard
+    //      Render → Environment Variables dashboard (use __ double-underscore for nested keys)
+    //               Key: AdminSeed__Email   Value: admin@agrilink.com
+    //               Key: AdminSeed__Password  Value: <your password>
     var adminEmail    = app.Configuration["AdminSeed:Email"];
     var adminPassword = app.Configuration["AdminSeed:Password"];
 
@@ -85,6 +89,7 @@ using (var scope = app.Services.CreateScope())
     {
         if (await userManager.FindByEmailAsync(adminEmail) == null)
         {
+            logger.LogInformation("Seeding admin user: {Email}", adminEmail);
             var adminUser = new ApplicationUser
             {
                 UserName  = adminEmail,
@@ -96,8 +101,24 @@ using (var scope = app.Services.CreateScope())
 
             var result = await userManager.CreateAsync(adminUser, adminPassword);
             if (result.Succeeded)
+            {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
+                logger.LogInformation("Admin user seeded successfully.");
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                    logger.LogError("Admin seed error: {Code} - {Description}", error.Code, error.Description);
+            }
         }
+        else
+        {
+            logger.LogInformation("Admin user already exists, skipping seed.");
+        }
+    }
+    else
+    {
+        logger.LogWarning("AdminSeed:Email or AdminSeed:Password not set — admin user not seeded.");
     }
 }
 
