@@ -14,10 +14,10 @@
             and stores the median across mandis. Rates you entered manually are never overwritten.
         </p>
         <div class="d-flex flex-wrap gap-3 align-items-center">
-            <form asp-action="Sync" method="post">
+            <form asp-controller="MarketPrice" asp-action="Sync" method="post">
                 <button type="submit" class="btn btn-success">Sync tracked commodities</button>
             </form>
-            <form asp-action="Sync" method="post" class="d-flex gap-2">
+            <form asp-controller="MarketPrice" asp-action="Sync" method="post" class="d-flex gap-2">
                 <input name="commodity" class="form-control" placeholder="e.g. Cauliflower" required maxlength="100" />
                 <button type="submit" class="btn btn-outline-success text-nowrap">Fetch one</button>
             </form>

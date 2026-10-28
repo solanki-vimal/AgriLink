@@ -1,7 +1,8 @@
-    using AgriLink.Data;
+using AgriLink.Data;
 using AgriLink.Helpers;
 using AgriLink.Models;
 using AgriLink.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,16 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+// Trust the reverse-proxy headers forwarded by Render (X-Forwarded-For, X-Forwarded-Proto).
+// Without this, ASP.NET sees HTTP internally and antiforgery cookies get mismatched,
+// causing POST forms to return 405 Method Not Allowed in production.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();   // trust any upstream proxy (Render's load balancer)
+    options.KnownProxies.Clear();
+});
+
 builder.Services.AddHttpClient<IMarketPriceProvider, AgmarknetPriceProvider>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(15);
@@ -29,6 +40,11 @@ var app = builder.Build();
 ImageUploadHelper.Initialize(app.Configuration);
 
 // Configure the HTTP request pipeline.
+
+// Must be first — tells ASP.NET the real protocol/IP from Render's load balancer.
+// Without this, antiforgery sees HTTP internally and rejects POST forms with 405.
+app.UseForwardedHeaders();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();

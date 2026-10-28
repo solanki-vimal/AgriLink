@@ -45,6 +45,10 @@ namespace AgriLink.Controllers
             return View(prices);
         }
 
+        // GET: MarketPrice/Sync (safe fallback if accessed via GET or reloaded)
+        [HttpGet]
+        public IActionResult Sync() => RedirectToAction(nameof(Index));
+
         // POST: MarketPrice/Sync
         // No commodity posted  -> sync every commodity in MarketPrices:TrackedCommodities
         // Commodity posted     -> sync just that one
