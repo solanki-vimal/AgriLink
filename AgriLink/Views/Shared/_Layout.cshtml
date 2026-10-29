@@ -1,3 +1,5 @@
+@inject AgriLink.Services.IOrderNotificationService OrderNotificationService
+@inject Microsoft.AspNetCore.Identity.UserManager<AgriLink.Models.ApplicationUser> UserManager
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,17 +16,17 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold text-success d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
                     <img src="~/favicon.svg" alt="AgriLink Logo" width="28" height="28" class="d-inline-block align-text-top" />
                     <span>AgriLink</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="collapse navbar-collapse d-lg-inline-flex justify-content-between" id="navbarSupportedContent">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
@@ -34,11 +36,19 @@
                         </li>
                         @if (User.IsInRole("Farmer"))
                         {
+                            var farmerId = UserManager.GetUserId(User);
+                            var pendingFarmerOffers = !string.IsNullOrEmpty(farmerId) ? await OrderNotificationService.GetPendingFarmerNegotiationsCountAsync(farmerId) : 0;
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Produce" asp-action="Index">My Produce</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Manage">Manage Orders</a>
+                                <a class="nav-link text-dark d-flex align-items-center gap-1" asp-area="" asp-controller="Order" asp-action="Manage">
+                                    Manage Orders
+                                    @if (pendingFarmerOffers > 0)
+                                    {
+                                        <span class="badge rounded-pill bg-danger" title="@pendingFarmerOffers offers waiting for your review">@pendingFarmerOffers</span>
+                                    }
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="FarmerProfile" asp-action="Index">My Farm Profile</a>
@@ -46,8 +56,16 @@
                         }
                         @if (User.IsInRole("Buyer"))
                         {
+                            var buyerId = UserManager.GetUserId(User);
+                            var pendingBuyerOffers = !string.IsNullOrEmpty(buyerId) ? await OrderNotificationService.GetPendingBuyerNegotiationsCountAsync(buyerId) : 0;
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">My Orders</a>
+                                <a class="nav-link text-dark d-flex align-items-center gap-1" asp-area="" asp-controller="Order" asp-action="Index">
+                                    My Orders
+                                    @if (pendingBuyerOffers > 0)
+                                    {
+                                        <span class="badge rounded-pill bg-danger" title="@pendingBuyerOffers counter-offers waiting for your response">@pendingBuyerOffers</span>
+                                    }
+                                </a>
                             </li>
                         }
                         @if (User.IsInRole("Admin"))

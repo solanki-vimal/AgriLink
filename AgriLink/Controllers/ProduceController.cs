@@ -82,6 +82,16 @@ namespace AgriLink.Controllers
             _context.ProduceListings.Add(produce);
             await _context.SaveChangesAsync();
 
+            // Record initial listing price in PriceHistory
+            _context.PriceHistories.Add(new PriceHistory
+            {
+                ProduceId = produce.ProduceId,
+                OldPrice = produce.Price,
+                NewPrice = produce.Price,
+                ChangedAt = produce.CreatedAt
+            });
+            await _context.SaveChangesAsync();
+
             TempData["StatusMessage"] = $"\"{produce.Name}\" listed successfully.";
             return RedirectToAction(nameof(Index));
         }

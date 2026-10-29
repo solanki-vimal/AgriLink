@@ -1,4 +1,4 @@
-﻿@model AgriLink.ViewModels.FarmerProfileFormViewModel
+@model AgriLink.ViewModels.FarmerProfileFormViewModel
 
 @{
     ViewData["Title"] = "Edit Farm Profile";
@@ -58,7 +58,14 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Save Profile</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            @if (ViewBag.HasExistingProfile == true)
+            {
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            }
+            else
+            {
+                <a asp-controller="Produce" asp-action="Index" class="btn btn-secondary">Cancel</a>
+            }
         </form>
     </div>
 </div>

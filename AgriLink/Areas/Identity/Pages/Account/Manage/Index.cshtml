@@ -1,0 +1,96 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<!-- Profile Header Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-sm-row align-items-center gap-3">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 64px; height: 64px; min-width: 64px;">
+            <i class="bi bi-person-fill fs-2"></i>
+        </div>
+        <div class="flex-grow-1 text-center text-sm-start">
+            <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 flex-wrap mb-1">
+                <h4 class="fw-bold mb-0">@Model.Input.FullName</h4>
+                @foreach (var role in Model.Roles)
+                {
+                    <span class="badge bg-success">@role</span>
+                }
+            </div>
+            <p class="text-muted small mb-0">
+                <i class="bi bi-envelope me-1"></i>@Model.Email
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Edit Form -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-bottom py-3 px-4">
+        <h5 class="fw-bold mb-0">Personal Information</h5>
+    </div>
+    <div class="card-body p-4">
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-1"></i>@Model.StatusMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <form id="profile-form" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <!-- Email (Read-Only) -->
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-semibold">Email Address</label>
+                <div class="input-group">
+                    <input value="@Model.Email" class="form-control bg-light" disabled />
+                    <span class="input-group-text bg-light text-success" title="Email Verified">
+                        <i class="bi bi-patch-check-fill me-1"></i>Verified
+                    </span>
+                </div>
+                <div class="form-text small">Your email is your login username and cannot be changed directly.</div>
+            </div>
+
+            <!-- Full Name (Editable) -->
+            <div class="mb-3">
+                <label asp-for="Input.FullName" class="form-label fw-semibold">
+                    Full Name <span class="text-danger">*</span>
+                </label>
+                <input asp-for="Input.FullName" class="form-control" placeholder="Enter your full name" />
+                <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="mb-3">
+                <label asp-for="Input.PhoneNumber" class="form-label fw-semibold">Phone Number</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="e.g. +91 98765 43210" />
+                </div>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                <div class="form-text small">Used for order coordination and delivery contact.</div>
+            </div>
+
+            <!-- Address -->
+            <div class="mb-4">
+                <label asp-for="Input.Address" class="form-label fw-semibold">
+                    Address <span class="text-danger">*</span>
+                </label>
+                <textarea asp-for="Input.Address" class="form-control" rows="2" placeholder="Enter your delivery or farm address"></textarea>
+                <span asp-validation-for="Input.Address" class="text-danger small"></span>
+            </div>
+
+            <button id="update-profile-button" type="submit" class="btn btn-success fw-bold px-4">
+                <i class="bi bi-check2-circle me-1"></i>Save Profile Changes
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

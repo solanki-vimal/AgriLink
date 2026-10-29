@@ -1,0 +1,26 @@
+@using Microsoft.AspNetCore.Identity
+@using AgriLink.Models
+@inject SignInManager<ApplicationUser> SignInManager
+
+<div class="card border-0 shadow-sm rounded-4 p-2">
+    <ul class="nav nav-pills flex-column gap-1">
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">
+                <i class="bi bi-person me-2"></i>Profile
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">
+                <i class="bi bi-key me-2"></i>Password
+            </a>
+        </li>
+        @if (User.IsInRole("Farmer"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="FarmerProfile" asp-action="Index">
+                    <i class="bi bi-flower1 me-2 text-success"></i>Farm Profile
+                </a>
+            </li>
+        }
+    </ul>
+</div>

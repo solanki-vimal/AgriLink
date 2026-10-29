@@ -1,0 +1,42 @@
+@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Confirm your email";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4 p-md-5">
+                <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mx-auto mb-3" style="width: 80px; height: 80px;">
+                    <i class="bi bi-envelope-check-fill fs-1"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-2">Check Your Email</h2>
+                <p class="text-muted mb-4">
+                    We've sent a verification link to <strong class="text-dark">@Model.Email</strong>.
+                    Please click the link in the email to confirm your account and get started on AgriLink.
+                </p>
+
+                <div class="alert alert-light border small text-start mb-4">
+                    <div class="fw-semibold mb-1"><i class="bi bi-info-circle me-1 text-primary"></i>Didn't receive the email?</div>
+                    <ul class="mb-2 ps-3 text-muted">
+                        <li>Check your spam or junk folder.</li>
+                        <li>It may take 1-2 minutes to arrive.</li>
+                    </ul>
+                    <a asp-page="./ResendEmailConfirmation" asp-route-email="@Model.Email" class="text-success fw-semibold text-decoration-none">
+                        <i class="bi bi-arrow-repeat me-1"></i>Click here to resend the confirmation email
+                    </a>
+                </div>
+
+                <div class="d-flex justify-content-center gap-2">
+                    <a asp-page="./Login" class="btn btn-outline-success">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Go to Login
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+                        Return Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

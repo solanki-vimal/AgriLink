@@ -5,6 +5,7 @@ using AgriLink.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,10 +16,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IOrderNotificationService, OrderNotificationService>();
+builder.Services.AddScoped<IOrderEmailNotificationService, OrderEmailNotificationService>();
 
 // Persist Data Protection keys to the database so login cookies and antiforgery tokens
 // survive container restarts and redeployments on Render.
@@ -87,7 +93,7 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var logger      = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
                           .CreateLogger("AdminSeed");
 
     // 1. Ensure all roles exist
@@ -104,7 +110,7 @@ using (var scope = app.Services.CreateScope())
     //      Render → Environment Variables dashboard (use __ double-underscore for nested keys)
     //               Key: AdminSeed__Email   Value: admin@agrilink.com
     //               Key: AdminSeed__Password  Value: <your password>
-    var adminEmail    = app.Configuration["AdminSeed:Email"];
+    var adminEmail = app.Configuration["AdminSeed:Email"];
     var adminPassword = app.Configuration["AdminSeed:Password"];
 
     if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
@@ -114,10 +120,11 @@ using (var scope = app.Services.CreateScope())
             logger.LogInformation("Seeding admin user: {Email}", adminEmail);
             var adminUser = new ApplicationUser
             {
-                UserName  = adminEmail,
-                Email     = adminEmail,
-                FullName  = "AgriLink Admin",
-                Address   = "Platform HQ",
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                FullName = "AgriLink Admin",
+                Address = "Platform HQ",
                 CreatedAt = DateTime.Now
             };
 
@@ -142,6 +149,11 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogWarning("AdminSeed:Email or AdminSeed:Password not set — admin user not seeded.");
     }
+
+    // Backfill any existing accounts created prior to enabling RequireConfirmedAccount
+    // so existing farmers, buyers, and admins are not locked out.
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.ExecuteSqlRawAsync("UPDATE AspNetUsers SET EmailConfirmed = 1 WHERE EmailConfirmed = 0");
 }
 
 app.Run();

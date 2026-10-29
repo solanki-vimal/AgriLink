@@ -1,0 +1,48 @@
+@page
+@model ResendEmailConfirmationModel
+@{
+    ViewData["Title"] = "Resend Email Confirmation";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 72px; height: 72px;">
+                        <i class="bi bi-envelope-arrow-up-fill fs-1"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1">Resend Confirmation</h2>
+                    <p class="text-muted small">Enter your email address to receive a new account verification link.</p>
+                </div>
+
+                <form method="post">
+                    <div asp-validation-summary="All" class="alert alert-info py-2 small"></div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="email" placeholder="name@example.com" />
+                        <label asp-for="Input.Email">Email Address</label>
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 btn-lg fw-bold mb-3">
+                        <i class="bi bi-send me-1"></i>Resend Verification Link
+                    </button>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-page="./Login" class="text-decoration-none small">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Login
+                        </a>
+                        <a asp-page="./Register" class="text-decoration-none small text-muted">
+                            Need an account?
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

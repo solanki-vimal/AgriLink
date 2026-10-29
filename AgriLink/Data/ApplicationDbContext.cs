@@ -19,6 +19,7 @@ namespace AgriLink.Data
         public DbSet<PriceHistory> PriceHistories { get; set; }
         public DbSet<FarmerProfile> FarmerProfiles { get; set; }
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+        public DbSet<PriceOffer> PriceOffers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +51,20 @@ namespace AgriLink.Data
                 .HasOne(o => o.Buyer)
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.BuyerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Order -> PriceOffer : 1-to-many
+            modelBuilder.Entity<PriceOffer>()
+                .HasOne(po => po.Order)
+                .WithMany(o => o.PriceOffers)
+                .HasForeignKey(po => po.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // User (Proposer) -> PriceOffer : 1-to-many
+            modelBuilder.Entity<PriceOffer>()
+                .HasOne(po => po.Proposer)
+                .WithMany()
+                .HasForeignKey(po => po.ProposerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Category -> MarketPrice : 1-to-many

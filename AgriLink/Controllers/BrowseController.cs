@@ -140,18 +140,35 @@ namespace AgriLink.Controllers
             var chartLabels = new List<string>();
             var chartPrices = new List<decimal>();
 
+            bool hasMultipleOnSameDay = priceHistories
+                .Select(p => p.ChangedAt.Date)
+                .Append(produce.CreatedAt.Date)
+                .GroupBy(d => d)
+                .Any(g => g.Count() > 1);
+
+            string dateFormat = hasMultipleOnSameDay ? "MMM dd, hh:mm tt" : "MMM dd";
+
             if (priceHistories.Any())
             {
+                var first = priceHistories.First();
+                // If the first history record was a price change (OldPrice != NewPrice),
+                // include the initial starting price so the baseline is never lost!
+                if (first.OldPrice != first.NewPrice)
+                {
+                    chartLabels.Add(produce.CreatedAt.ToString(dateFormat));
+                    chartPrices.Add(first.OldPrice);
+                }
+
                 foreach (var ph in priceHistories)
                 {
-                    chartLabels.Add(ph.ChangedAt.ToString("MMM dd"));
+                    chartLabels.Add(ph.ChangedAt.ToString(dateFormat));
                     chartPrices.Add(ph.NewPrice);
                 }
             }
             else
             {
                 // Initial baseline price point
-                chartLabels.Add(produce.CreatedAt.ToString("MMM dd"));
+                chartLabels.Add(produce.CreatedAt.ToString(dateFormat));
                 chartPrices.Add(produce.Price);
             }
 

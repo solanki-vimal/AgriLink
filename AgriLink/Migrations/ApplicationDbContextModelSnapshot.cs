@@ -253,11 +253,21 @@ namespace AgriLink.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("FarmerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ProduceId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProduceName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("QuantityOrdered")
                         .HasColumnType("decimal(10,2)");
@@ -266,6 +276,14 @@ namespace AgriLink.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(10,2)");
 
                     b.HasKey("OrderId");
@@ -302,6 +320,49 @@ namespace AgriLink.Migrations
                     b.HasIndex("ProduceId");
 
                     b.ToTable("PriceHistories");
+                });
+
+            modelBuilder.Entity("AgriLink.Models.PriceOffer", b =>
+                {
+                    b.Property<int>("PriceOfferId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PriceOfferId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("OfferedUnitPrice")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProposerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("RoundNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("PriceOfferId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProposerId");
+
+                    b.ToTable("PriceOffers");
                 });
 
             modelBuilder.Entity("AgriLink.Models.Produce", b =>
@@ -580,6 +641,25 @@ namespace AgriLink.Migrations
                     b.Navigation("Produce");
                 });
 
+            modelBuilder.Entity("AgriLink.Models.PriceOffer", b =>
+                {
+                    b.HasOne("AgriLink.Models.Order", "Order")
+                        .WithMany("PriceOffers")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AgriLink.Models.ApplicationUser", "Proposer")
+                        .WithMany()
+                        .HasForeignKey("ProposerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Proposer");
+                });
+
             modelBuilder.Entity("AgriLink.Models.Produce", b =>
                 {
                     b.HasOne("AgriLink.Models.Category", "Category")
@@ -666,6 +746,11 @@ namespace AgriLink.Migrations
                     b.Navigation("MarketPrices");
 
                     b.Navigation("ProduceListings");
+                });
+
+            modelBuilder.Entity("AgriLink.Models.Order", b =>
+                {
+                    b.Navigation("PriceOffers");
                 });
 
             modelBuilder.Entity("AgriLink.Models.Produce", b =>

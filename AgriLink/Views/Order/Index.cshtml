@@ -5,49 +5,105 @@
     ViewData["Title"] = "My Orders";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">@ViewData["Title"]</h1>
+    <a asp-controller="Browse" asp-action="Index" class="btn btn-outline-success btn-sm">
+        <i class="bi bi-cart-plus me-1"></i> Browse Marketplace
+    </a>
+</div>
 
 @if (!Model.Any())
 {
-    <p class="text-muted">You haven't placed any orders yet. <a asp-controller="Browse" asp-action="Index">Browse the marketplace</a>.</p>
+    <div class="card border-0 shadow-sm p-4 text-center my-4">
+        <p class="text-muted mb-3">You haven't placed any orders yet.</p>
+        <div>
+            <a asp-controller="Browse" asp-action="Index" class="btn btn-success">
+                Start Shopping Now
+            </a>
+        </div>
+    </div>
 }
 else
 {
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th>Produce</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Total Price</th>
-                <th>Order Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in Model)
-            {
-                <tr>
-                    <td>@order.Produce?.Name</td>
-                    <td>@order.Produce?.Category?.Name</td>
-                    <td>@order.QuantityOrdered @order.Produce?.Unit</td>
-                    <td>₹@order.TotalPrice</td>
-                    <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
-                    <td>
-                        @{
-                            var badgeClass = order.Status switch
-                            {
-                                OrderStatus.Pending => "bg-warning text-dark",
-                                OrderStatus.Accepted => "bg-primary",
-                                OrderStatus.Completed => "bg-success",
-                                OrderStatus.Rejected => "bg-danger",
-                                _ => "bg-secondary"
-                            };
-                        }
-                        <span class="badge @badgeClass">@order.Status</span>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order #</th>
+                        <th>Produce</th>
+                        <th>Farmer</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Order Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        var produceName = !string.IsNullOrWhiteSpace(order.ProduceName) ? order.ProduceName : (order.Produce?.Name ?? "Produce Item");
+                        var unit = !string.IsNullOrWhiteSpace(order.Unit) ? order.Unit : (order.Produce?.Unit ?? "units");
+                        var farmerName = !string.IsNullOrWhiteSpace(order.FarmerName) ? order.FarmerName : (order.Produce?.Farmer?.FullName ?? "—");
+                        var unitPrice = order.UnitPrice > 0 ? order.UnitPrice : (order.QuantityOrdered > 0 ? Math.Round(order.TotalPrice / order.QuantityOrdered, 2) : 0);
+
+                        <tr>
+                            <td class="fw-bold">#@order.OrderId</td>
+                            <td>
+                                <div>@produceName</div>
+                                @if (order.Produce?.Category != null)
+                                {
+                                    <small class="text-muted">@order.Produce.Category.Name</small>
+                                }
+                            </td>
+                            <td>@farmerName</td>
+                            <td>@order.QuantityOrdered @unit</td>
+                            <td>₹@unitPrice.ToString("N2")</td>
+                            <td class="fw-bold text-success">₹@order.TotalPrice.ToString("N2")</td>
+                            <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @{
+                                    var badgeClass = order.Status switch
+                                    {
+                                        OrderStatus.Pending => "bg-warning text-dark",
+                                        OrderStatus.Negotiating => "bg-info text-dark",
+                                        OrderStatus.Accepted => "bg-primary",
+                                        OrderStatus.Completed => "bg-success",
+                                        OrderStatus.Rejected => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @badgeClass">@order.Status</span>
+                            </td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Confirmation" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-secondary" title="View Order Details">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                                @if (order.Status == OrderStatus.Negotiating)
+                                {
+                                    <a asp-action="Negotiate" asp-route-id="@order.OrderId" class="btn btn-sm btn-warning ms-1 fw-semibold" title="View Price Negotiation">
+                                        <i class="bi bi-chat-quote"></i> Negotiate
+                                    </a>
+                                }
+                                else if (order.Status == OrderStatus.Accepted || order.Status == OrderStatus.Completed)
+                                {
+                                    <a asp-action="Receipt" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-success ms-1" title="View Sales Receipt">
+                                        <i class="bi bi-receipt"></i> Receipt
+                                    </a>
+                                }
+                                else if (order.Status != OrderStatus.Rejected)
+                                {
+                                    <a asp-action="Receipt" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-secondary ms-1" title="View Order Summary">
+                                        <i class="bi bi-file-text"></i> Summary
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }

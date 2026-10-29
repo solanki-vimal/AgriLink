@@ -65,6 +65,7 @@ namespace AgriLink.Controllers
                     ExistingFarmImageUrl = existing.FarmImageUrl
                 };
 
+            ViewBag.HasExistingProfile = existing != null;
             return View(vm);
         }
 
@@ -79,6 +80,7 @@ namespace AgriLink.Controllers
 
             if (!ModelState.IsValid)
             {
+                ViewBag.HasExistingProfile = await _context.FarmerProfiles.AnyAsync(fp => fp.UserId == userId);
                 return View(vm);
             }
 

@@ -15,9 +15,24 @@ namespace AgriLink.ViewModels
         public string FarmerName { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
 
+        // Agmarknet benchmark reference price (if available for this commodity)
+        public decimal? MarketBenchmarkPrice { get; set; }
+
         [Required]
         [Range(0.1, 100000, ErrorMessage = "Quantity must be greater than 0.")]
         [Display(Name = "Quantity to Order")]
         public decimal QuantityOrdered { get; set; }
+
+        // Optional price negotiation
+        [Display(Name = "Make a Price Offer")]
+        public bool WantToNegotiate { get; set; }
+
+        [Display(Name = "Your Offered Unit Price")]
+        [Range(0.01, 1000000, ErrorMessage = "Offer price must be greater than zero.")]
+        public decimal? OfferedUnitPrice { get; set; }
+
+        [MaxLength(500)]
+        [Display(Name = "Note to Farmer (Optional)")]
+        public string? OfferMessage { get; set; }
     }
 }
