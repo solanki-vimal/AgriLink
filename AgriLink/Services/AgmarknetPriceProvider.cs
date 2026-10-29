@@ -101,7 +101,7 @@ namespace AgriLink.Services
                     HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden =>
                         "data.gov.in rejected the request (HTTP " + (int)ex.StatusCode + ") - check the API key, or the portal may be blocking requests",
                     not null => "data.gov.in returned HTTP " + (int)ex.StatusCode,
-                    _ => "could not reach data.gov.in"
+                    _ => $"could not reach data.gov.in ({ex.Message})"
                 };
                 throw new MarketPriceProviderException(reason, ex);
             }

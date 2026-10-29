@@ -1,10 +1,11 @@
-﻿using AgriLink.Models;
+using AgriLink.Models;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AgriLink.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -17,6 +18,7 @@ namespace AgriLink.Data
         public DbSet<MarketPrice> MarketPrices { get; set; }
         public DbSet<PriceHistory> PriceHistories { get; set; }
         public DbSet<FarmerProfile> FarmerProfiles { get; set; }
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

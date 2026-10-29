@@ -2,6 +2,7 @@ using AgriLink.Data;
 using AgriLink.Helpers;
 using AgriLink.Models;
 using AgriLink.Services;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,11 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+// Persist Data Protection keys to the database so login cookies and antiforgery tokens
+// survive container restarts and redeployments on Render.
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>();
 
 // Trust the reverse-proxy headers forwarded by Render (X-Forwarded-For, X-Forwarded-Proto).
 // Without this, ASP.NET sees HTTP internally and antiforgery cookies get mismatched,
