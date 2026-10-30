@@ -26,10 +26,24 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IOrderNotificationService, OrderNotificationService>();
 builder.Services.AddScoped<IOrderEmailNotificationService, OrderEmailNotificationService>();
 
-// Persist Data Protection keys to the database so login cookies and antiforgery tokens
-// survive container restarts and redeployments on Render.
+// Persist Data Protection keys to the database with a fixed application name so login cookies
+// and antiforgery tokens survive container restarts, sleep/wake cycles, and redeployments on Render.
 builder.Services.AddDataProtection()
+    .SetApplicationName("AgriLink")
     .PersistKeysToDbContext<ApplicationDbContext>();
+
+// Configure application authentication cookie for longevity and reverse-proxy safety
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "AgriLink.Auth";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+    options.LoginPath = "/Identity/Account/Login";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
 
 // Trust the reverse-proxy headers forwarded by Render (X-Forwarded-For, X-Forwarded-Proto).
 // Without this, ASP.NET sees HTTP internally and antiforgery cookies get mismatched,
@@ -88,13 +102,25 @@ app.MapControllerRoute(
 app.MapRazorPages()
    .WithStaticAssets();
 
-// Seed Farmer / Buyer / Admin roles, and an Admin user (credentials from environment), on startup
+// Ensure database is up to date, roles exist, and admin user is seeded on startup
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
-                          .CreateLogger("AdminSeed");
+                          .CreateLogger("StartupInit");
+
+    // Automatically apply any pending EF Core migrations (ensures DataProtectionKeys, PriceOffers, etc. exist)
+    try
+    {
+        await dbContext.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while applying database migrations.");
+    }
 
     // 1. Ensure all roles exist
     string[] roleNames = { "Farmer", "Buyer", "Admin" };
@@ -152,7 +178,6 @@ using (var scope = app.Services.CreateScope())
 
     // Backfill any existing accounts created prior to enabling RequireConfirmedAccount
     // so existing farmers, buyers, and admins are not locked out.
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.ExecuteSqlRawAsync("UPDATE AspNetUsers SET EmailConfirmed = 1 WHERE EmailConfirmed = 0");
 }
 
